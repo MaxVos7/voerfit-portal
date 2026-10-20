@@ -1,0 +1,38 @@
+# Built inside the image instead.
+/node_modules
+/vendor
+/public/build
+/public/hot
+/resources/js/actions
+/resources/js/routes
+/resources/js/wayfinder
+/bootstrap/cache/*.php
+/bootstrap/ssr
+
+# Local state and secrets.
+.env
+.env.*
+!.env.example
+/database/*.sqlite
+/storage/logs/*
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/pail
+/.phpunit.cache
+
+# Tooling that does not belong in production.
+/.git
+/.github
+/.ai
+/.claude
+/.junie
+/.mcp.json
+/AGENTS.md
+/CLAUDE.md
+/boost.json
+/tests
+/k8s
+/Dockerfile
+/cloudbuild.yaml
+.DS_Store

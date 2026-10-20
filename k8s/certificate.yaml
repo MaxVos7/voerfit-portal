@@ -1,0 +1,10 @@
+# Its own ManagedCertificate, like grafana-vanvelde-cert: GKE does not reliably
+# re-provision a certificate whose spec.domains change, so the live certs stay untouched.
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: voerfit-portal-cert
+  namespace: ai-stack
+spec:
+  domains:
+    - vanvelde-new.voerfit.nl
