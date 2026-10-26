@@ -25,3 +25,11 @@ export type ChartMilkSample = {
     urea: number | null;
     cellCount: number | null;
 };
+
+/** A cow the user marked as favorite, shared with every page. */
+export type FavoriteCow = {
+    animalId: number;
+    cowNumber: number | null;
+    name: string | null;
+    label: string;
+};

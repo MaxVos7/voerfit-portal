@@ -4,6 +4,7 @@ use App\Http\Controllers\CameraImagesController;
 use App\Http\Controllers\CowOverviewController;
 use App\Http\Controllers\DayOverviewColumnsController;
 use App\Http\Controllers\DayOverviewController;
+use App\Http\Controllers\FavoriteCowsController;
 use App\Http\Controllers\FeedRulesController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('dagoverzicht/kolommen', [DayOverviewColumnsController::class, 'destroy'])->name('day-overview.columns.destroy');
     Route::get('koeien/{animal}', CowOverviewController::class)->whereNumber('animal')->name('cows.show');
     Route::get('koeien/{animal}/camerabeelden', CameraImagesController::class)->whereNumber('animal')->name('cows.camera');
+    Route::post('koeien/{animal}/favoriet', [FavoriteCowsController::class, 'store'])->whereNumber('animal')->name('cows.favorite.store');
+    Route::delete('koeien/{animal}/favoriet', [FavoriteCowsController::class, 'destroy'])->whereNumber('animal')->name('cows.favorite.destroy');
     Route::get('voerregels', FeedRulesController::class)->name('feed-rules');
 
     Route::inertia('dashboard', 'Dashboard')->name('dashboard');

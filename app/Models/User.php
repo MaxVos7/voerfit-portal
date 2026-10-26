@@ -61,6 +61,14 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
+     * @return HasMany<FavoriteCow, $this>
+     */
+    public function favoriteCows(): HasMany
+    {
+        return $this->hasMany(FavoriteCow::class);
+    }
+
+    /**
      * The user's day overview columns in their chosen order.
      *
      * Columns the user has not placed yet, such as new ones, follow at the end as visible,

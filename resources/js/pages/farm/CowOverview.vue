@@ -2,6 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowLeft, Camera } from '@lucide/vue';
 import CowChart from '@/components/farm/CowChart.vue';
+import FavoriteButton from '@/components/farm/FavoriteButton.vue';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -112,6 +113,7 @@ function feedClass(delta: number | null): string {
                     Foto's
                 </Link>
             </Button>
+            <FavoriteButton :animal-id="cow.animalId" with-label />
 
             <div class="ml-2 flex items-center rounded-md border bg-background">
                 <span class="border-r px-3 text-sm text-muted-foreground"

@@ -10,6 +10,7 @@ import {
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import ColumnSettings from '@/components/farm/ColumnSettings.vue';
+import FavoriteButton from '@/components/farm/FavoriteButton.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -319,6 +320,9 @@ function cell(cow: Cow, key: SortKey): string {
                 <table class="w-full border-collapse text-sm tabular-nums">
                     <thead class="sticky top-0 z-10 bg-background">
                         <tr>
+                            <th scope="col" class="w-8 border-b px-1">
+                                <span class="sr-only">Favoriet</span>
+                            </th>
                             <th
                                 v-for="column in visibleColumns"
                                 :key="column.key"
@@ -369,6 +373,9 @@ function cell(cow: Cow, key: SortKey): string {
                             :key="cow.animalId"
                             class="hover:bg-muted/50"
                         >
+                            <td class="border-b px-1 py-0.5">
+                                <FavoriteButton :animal-id="cow.animalId" />
+                            </td>
                             <td
                                 v-for="column in visibleColumns"
                                 :key="column.key"
@@ -426,7 +433,7 @@ function cell(cow: Cow, key: SortKey): string {
                         </tr>
                         <tr v-if="cows.length === 0">
                             <td
-                                :colspan="visibleColumns.length"
+                                :colspan="visibleColumns.length + 1"
                                 class="px-2 py-8 text-center text-muted-foreground"
                             >
                                 Geen lacterende koeien voor deze dag.
@@ -434,7 +441,7 @@ function cell(cow: Cow, key: SortKey): string {
                         </tr>
                         <tr v-else-if="sortedCows.length === 0">
                             <td
-                                :colspan="visibleColumns.length"
+                                :colspan="visibleColumns.length + 1"
                                 class="px-2 py-8 text-center text-muted-foreground"
                             >
                                 Geen koeien gevonden voor "{{ search }}".

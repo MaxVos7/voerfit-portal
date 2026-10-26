@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3';
 import { FileText, LayoutGrid } from '@lucide/vue';
 import AppLogo from '@/components/AppLogo.vue';
+import NavFavorites from '@/components/NavFavorites.vue';
 import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import {
@@ -46,6 +47,7 @@ const mainNavItems: NavItem[] = [
 
         <SidebarContent>
             <NavMain :items="mainNavItems" />
+            <NavFavorites />
         </SidebarContent>
 
         <SidebarFooter>
