@@ -7,7 +7,6 @@ use App\Models\Farm\AnimalSummary;
 use App\Models\Farm\CameraSnapshot;
 use App\Models\Farm\CowDailySummary;
 use Carbon\CarbonImmutable;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -19,7 +18,7 @@ class CameraImagesController extends Controller
     /**
      * Show the photos one cow had taken before milking on one day, the portal's copy of Grafana's "Camerabeelden".
      */
-    public function __invoke(Request $request, int $animal): Response
+    public function __invoke(int $animal): Response
     {
         $cow = AnimalSummary::query()
             ->select('core_animal_summary.*')
@@ -34,11 +33,9 @@ class CameraImagesController extends Controller
 
         $days = $snapshots
             ->groupBy(fn (CameraSnapshot $snapshot): string => $snapshot->localTime()->toDateString())
-            ->keys()
-            ->sortDesc()
-            ->values();
+            ->sortKeysDesc();
 
-        $selectedDay = $this->selectedDay($request->query('dag'), $days);
+        $latestDay = $days->first()?->first()?->localTime()->toDateString();
 
         return Inertia::render('farm/CameraImages', [
             'cow' => [
@@ -49,31 +46,16 @@ class CameraImagesController extends Controller
                 'label' => $cow->label(),
             ],
             'cows' => $this->cowOptions(),
-            'days' => $days->map(fn (string $day): array => [
+            'days' => $days->map(fn (Collection $photos, string $day): array => [
                 'value' => $day,
                 'label' => $this->dutchLabel(CarbonImmutable::parse($day)),
-            ])->all(),
-            'selectedDay' => $selectedDay,
-            'photos' => $snapshots
-                ->filter(fn (CameraSnapshot $snapshot): bool => $snapshot->localTime()->toDateString() === $selectedDay)
-                ->map(fn (CameraSnapshot $snapshot): array => [
+                'photos' => $photos->map(fn (CameraSnapshot $snapshot): array => [
                     'url' => $snapshot->url(),
                     'time' => $snapshot->localTime()->format('H:i'),
-                ])
-                ->values()
-                ->all(),
-            'summary' => $selectedDay === null ? null : $this->summary($cow, $selectedDay),
+                ])->values()->all(),
+            ])->values()->all(),
+            'summary' => $latestDay === null ? null : $this->summary($cow, $latestDay),
         ]);
-    }
-
-    /**
-     * The requested day when it has photos, else the latest day that has.
-     *
-     * @param  Collection<int, string>  $days
-     */
-    private function selectedDay(mixed $requested, Collection $days): ?string
-    {
-        return is_string($requested) && $days->contains($requested) ? $requested : $days->first();
     }
 
     /**
@@ -100,7 +82,7 @@ class CameraImagesController extends Controller
     }
 
     /**
-     * The cow's key figures on the day of the photos.
+     * The cow's key figures on the day of the most recent photos.
      *
      * @return array<string, mixed>|null
      */

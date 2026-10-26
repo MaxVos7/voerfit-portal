@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/select';
 import { camera, show } from '@/routes/cows';
 
-const props = defineProps<{
+defineProps<{
     cow: {
         animalId: number;
         cowNumber: number | null;
@@ -21,9 +21,11 @@ const props = defineProps<{
         label: string;
     };
     cows: { animalId: number; label: string }[];
-    days: { value: string; label: string }[];
-    selectedDay: string | null;
-    photos: { url: string; time: string }[];
+    days: {
+        value: string;
+        label: string;
+        photos: { url: string; time: string }[];
+    }[];
     summary: {
         daysInMilk: number | null;
         lactationNumber: number | null;
@@ -44,18 +46,6 @@ function selectCow(animalId: unknown): void {
     }
 
     router.get(camera.url(animalId));
-}
-
-function selectDay(day: unknown): void {
-    if (typeof day !== 'string') {
-        return;
-    }
-
-    router.get(
-        camera.url(props.cow.animalId, { query: { dag: day } }),
-        {},
-        { preserveScroll: true },
-    );
 }
 
 function decimal(value: number | null, digits: number, unit = ''): string {
@@ -124,36 +114,13 @@ function feedClass(delta: number | null): string {
                     </SelectContent>
                 </Select>
             </div>
-
-            <div class="flex items-center rounded-md border bg-background">
-                <span class="border-r px-3 text-sm text-muted-foreground"
-                    >Dag</span
-                >
-                <Select
-                    :model-value="selectedDay ?? undefined"
-                    @update:model-value="selectDay"
-                >
-                    <SelectTrigger
-                        class="w-44 border-0 shadow-none"
-                        aria-label="Dag"
-                    >
-                        <SelectValue placeholder="Geen foto's" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem
-                            v-for="day in days"
-                            :key="day.value"
-                            :value="day.value"
-                        >
-                            {{ day.label }}
-                        </SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-            <LogoutButton />
         </header>
 
-        <section v-if="summary" class="rounded-lg border bg-background px-4 py-3">
+        <section
+            v-if="summary"
+            class="rounded-lg border bg-background px-4 py-3"
+        >
+            <h2 class="mb-3 font-medium">{{ days[0]?.label }}</h2>
             <dl
                 class="grid grid-cols-2 gap-4 tabular-nums sm:grid-cols-4 lg:grid-cols-8"
             >
@@ -200,11 +167,15 @@ function feedClass(delta: number | null): string {
             </dl>
         </section>
 
-        <section class="rounded-lg border bg-background px-4 py-3">
-            <h2 class="mb-3 font-medium">{{ cow.label }}</h2>
-            <div v-if="photos.length" class="flex flex-wrap gap-4">
+        <section
+            v-for="day in days"
+            :key="day.value"
+            class="rounded-lg border bg-background px-4 py-3"
+        >
+            <h2 class="mb-3 font-medium">{{ day.label }}</h2>
+            <div class="flex flex-wrap gap-4">
                 <figure
-                    v-for="photo in photos"
+                    v-for="photo in day.photos"
                     :key="photo.url"
                     class="text-center"
                 >
@@ -219,9 +190,13 @@ function feedClass(delta: number | null): string {
                     </figcaption>
                 </figure>
             </div>
-            <p v-else class="py-12 text-center text-muted-foreground">
-                Geen foto's voor deze koe.
-            </p>
         </section>
+
+        <p
+            v-if="days.length === 0"
+            class="rounded-lg border bg-background py-12 text-center text-muted-foreground"
+        >
+            Geen foto's voor deze koe.
+        </p>
     </div>
 </template>
