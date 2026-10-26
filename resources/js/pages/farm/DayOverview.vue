@@ -5,7 +5,6 @@ import {
     ArrowUp,
     FileText,
     LayoutGrid,
-    Maximize,
     TriangleAlert,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
@@ -93,7 +92,6 @@ const columns: Column[] = [
 const sortKey = ref<SortKey>('cowNumber');
 const sortAscending = ref(true);
 const showAverages = ref(false);
-const tableCard = ref<HTMLElement | null>(null);
 
 const sortedCows = computed(() => {
     const direction = sortAscending.value ? 1 : -1;
@@ -140,16 +138,6 @@ function selectDay(day: unknown): void {
         {},
         { preserveState: true },
     );
-}
-
-function toggleFullscreen(): void {
-    if (document.fullscreenElement) {
-        void document.exitFullscreen();
-
-        return;
-    }
-
-    void tableCard.value?.requestFullscreen();
 }
 
 function decimal(value: number | null, digits: number, unit = ''): string {
@@ -250,10 +238,6 @@ function cell(cow: Cow, key: SortKey): string {
                 <LayoutGrid />
                 Met gemiddelden
             </Button>
-            <Button variant="outline" @click="toggleFullscreen">
-                <Maximize />
-                Volledig scherm
-            </Button>
             <Button variant="outline" as-child>
                 <Link :href="feedRules()">
                     <FileText />
@@ -264,7 +248,6 @@ function cell(cow: Cow, key: SortKey): string {
         </header>
 
         <section
-            ref="tableCard"
             class="flex min-h-0 flex-1 flex-col rounded-lg border bg-background"
         >
             <h2 class="px-4 pt-3 pb-2 font-medium">
