@@ -30,6 +30,7 @@ class DayOverviewController extends Controller
             ])->all(),
             'selectedDay' => $selectedDay?->toDateString(),
             'selectedDayLabel' => $selectedDay ? $this->dutchLabel($selectedDay) : null,
+            'columns' => $request->user()?->dayOverviewColumns() ?? [],
             'cows' => $selectedDay
                 ? DayOverviewCowResource::collection($this->cows($selectedDay))->resolve()
                 : [],

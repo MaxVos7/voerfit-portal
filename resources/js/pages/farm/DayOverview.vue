@@ -2,6 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowDown, ArrowUp, FileText, TriangleAlert } from '@lucide/vue';
 import { computed, ref } from 'vue';
+import ColumnSettings from '@/components/farm/ColumnSettings.vue';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -49,10 +50,11 @@ const props = defineProps<{
     days: { value: string; label: string }[];
     selectedDay: string | null;
     selectedDayLabel: string | null;
+    columns: { key: SortKey; visible: boolean }[];
     cows: Cow[];
 }>();
 
-const columns: Column[] = [
+const columnDefinitions: Column[] = [
     { key: 'cowNumber', label: 'Koenr.', align: 'right' },
     { key: 'lifeNumber', label: 'Levensnummer', align: 'left' },
     { key: 'daysInMilk', label: 'Lactatiedagen', align: 'right' },
@@ -74,6 +76,28 @@ const columns: Column[] = [
         isMilkSample: true,
     },
 ];
+
+const columnLabels = Object.fromEntries(
+    columnDefinitions.map((column) => [column.key, column.label]),
+);
+
+const visibleColumns = computed(() =>
+    props.columns
+        .filter((column) => column.visible)
+        .map(
+            (column) =>
+                columnDefinitions.find(
+                    (definition) => definition.key === column.key,
+                ) as Column,
+        ),
+);
+
+// The cow number links to the cow; when it is hidden, the first visible column takes over.
+const linkColumnKey = computed(
+    () =>
+        visibleColumns.value.find((column) => column.key === 'cowNumber')
+            ?.key ?? visibleColumns.value[0]?.key,
+);
 
 const sortKey = ref<SortKey>('cowNumber');
 const sortAscending = ref(true);
@@ -221,6 +245,7 @@ function cell(cow: Cow, key: SortKey): string {
                     Voerregels
                 </Link>
             </Button>
+            <ColumnSettings :columns="columns" :labels="columnLabels" />
         </header>
 
         <section
@@ -238,7 +263,7 @@ function cell(cow: Cow, key: SortKey): string {
                     <thead class="sticky top-0 z-10 bg-background">
                         <tr>
                             <th
-                                v-for="column in columns"
+                                v-for="column in visibleColumns"
                                 :key="column.key"
                                 scope="col"
                                 :aria-sort="
@@ -288,7 +313,7 @@ function cell(cow: Cow, key: SortKey): string {
                             class="hover:bg-muted/50"
                         >
                             <td
-                                v-for="column in columns"
+                                v-for="column in visibleColumns"
                                 :key="column.key"
                                 class="border-b px-2 py-1.5 whitespace-nowrap"
                                 :class="[
@@ -301,11 +326,15 @@ function cell(cow: Cow, key: SortKey): string {
                                 ]"
                             >
                                 <Link
-                                    v-if="column.key === 'cowNumber'"
+                                    v-if="column.key === linkColumnKey"
                                     :href="show(cow.animalId)"
                                     class="text-blue-600 hover:underline dark:text-blue-400"
                                 >
-                                    {{ cow.cowNumber ?? '–' }}
+                                    {{
+                                        column.key === 'cowNumber'
+                                            ? (cow.cowNumber ?? '–')
+                                            : cell(cow, column.key)
+                                    }}
                                 </Link>
                                 <span
                                     v-else-if="
@@ -340,7 +369,7 @@ function cell(cow: Cow, key: SortKey): string {
                         </tr>
                         <tr v-if="cows.length === 0">
                             <td
-                                :colspan="columns.length"
+                                :colspan="visibleColumns.length"
                                 class="px-2 py-8 text-center text-muted-foreground"
                             >
                                 Geen lacterende koeien voor deze dag.
