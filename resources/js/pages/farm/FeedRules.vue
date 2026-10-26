@@ -103,8 +103,11 @@ function shortDate(isoDate: string | null): string {
                         afwijking van het schema.
                     </li>
                     <li>
-                        <b>Maximaal {{ rule('weekly_step') }} kg verandering per
-                        week</b> — geldt voor álle paden, ook herstel.
+                        <b
+                            >Maximaal {{ rule('weekly_step') }} kg verandering
+                            per week</b
+                        >
+                        — geldt voor álle paden, ook herstel.
                     </li>
                     <li>
                         Plotselinge melkdaling
@@ -155,7 +158,9 @@ function shortDate(isoDate: string | null): string {
                                 <b>dalend</b> (≥ {{ rule('bcs_drop') }} daling
                                 per {{ rule('bcs_window') }} dgn)
                             </td>
-                            <td><b>+{{ rule('weekly_step') }} kg</b></td>
+                            <td>
+                                <b>+{{ rule('weekly_step') }} kg</b>
+                            </td>
                         </tr>
                         <tr class="border-b">
                             <td class="py-1 pr-4">
@@ -188,8 +193,11 @@ function shortDate(isoDate: string | null): string {
                 </h2>
                 <ul class="list-disc space-y-1 pl-5">
                     <li>
-                        <b>Stapbegrenzing: max {{ rule('engine_step') }} kg per
-                        dag</b> omhoog én omlaag, per voersoort.
+                        <b
+                            >Stapbegrenzing: max {{ rule('engine_step') }} kg
+                            per dag</b
+                        >
+                        omhoog én omlaag, per voersoort.
                     </li>
                     <li>
                         Absolute grenzen: voer 1 en 2:
@@ -237,9 +245,7 @@ function shortDate(isoDate: string | null): string {
                             {{ rule('hold_lookback') }} dagen</b
                         >.
                     </li>
-                    <li>
-                        Het schema wordt alléén <b>omlaag</b> gevolgd.
-                    </li>
+                    <li>Het schema wordt alléén <b>omlaag</b> gevolgd.</li>
                     <li>
                         Vrijgave zodra het schema haar niveau bereikt, bij
                         droogzetten, of als ze terugkeert in de proef.
