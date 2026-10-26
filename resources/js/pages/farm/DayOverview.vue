@@ -9,6 +9,7 @@ import {
     TriangleAlert,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
+import LogoutButton from '@/components/farm/LogoutButton.vue';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -17,7 +18,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { dayOverview } from '@/routes';
+import { dayOverview, feedRules } from '@/routes';
 import { show } from '@/routes/cows';
 
 type Cow = {
@@ -253,11 +254,13 @@ function cell(cow: Cow, key: SortKey): string {
                 <Maximize />
                 Volledig scherm
             </Button>
-            <!-- TODO: link to the Voerregels page once it exists in the portal. -->
-            <Button variant="outline" disabled title="Volgt binnenkort">
-                <FileText />
-                Voerregels
+            <Button variant="outline" as-child>
+                <Link :href="feedRules()">
+                    <FileText />
+                    Voerregels
+                </Link>
             </Button>
+            <LogoutButton />
         </header>
 
         <section

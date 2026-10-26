@@ -2,6 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowLeft, Camera } from '@lucide/vue';
 import CowChart from '@/components/farm/CowChart.vue';
+import LogoutButton from '@/components/farm/LogoutButton.vue';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -11,7 +12,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { dayOverview } from '@/routes';
-import { show } from '@/routes/cows';
+import { camera, show } from '@/routes/cows';
 import type { ChartBcs, ChartDay, ChartMilkSample } from '@/types';
 
 const props = defineProps<{
@@ -106,10 +107,11 @@ function feedClass(delta: number | null): string {
                     Terug
                 </Link>
             </Button>
-            <!-- TODO: link to the camera images page once it exists in the portal. -->
-            <Button disabled title="Volgt binnenkort">
-                <Camera />
-                Foto's
+            <Button as-child>
+                <Link :href="camera(cow.animalId)">
+                    <Camera />
+                    Foto's
+                </Link>
             </Button>
 
             <div class="ml-2 flex items-center rounded-md border bg-background">
@@ -163,6 +165,7 @@ function feedClass(delta: number | null): string {
                     </SelectContent>
                 </Select>
             </div>
+            <LogoutButton />
         </header>
 
         <section class="rounded-lg border bg-background px-4 py-3">

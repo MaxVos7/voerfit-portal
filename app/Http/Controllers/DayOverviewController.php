@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Concerns\FormatsDutchDates;
 use App\Http\Resources\DayOverviewCowResource;
 use App\Models\Farm\CowDailySummary;
 use Carbon\CarbonImmutable;
@@ -12,6 +13,8 @@ use Inertia\Response;
 
 class DayOverviewController extends Controller
 {
+    use FormatsDutchDates;
+
     /**
      * Show the lactating cows of one day, the portal's copy of Grafana's "Dagoverzicht koeien".
      */
@@ -85,15 +88,5 @@ class DayOverviewController extends Controller
 
         // createFromFormat rolls impossible dates such as 2026-13-45 over into valid ones.
         return $day !== null && $day->toDateString() === $value ? $day : null;
-    }
-
-    /**
-     * "19 oktober", with the year only when it is not the current year.
-     */
-    private function dutchLabel(CarbonImmutable $day): string
-    {
-        $format = $day->isCurrentYear() ? 'j F' : 'j F Y';
-
-        return $day->settings(['locale' => 'nl'])->translatedFormat($format);
     }
 }

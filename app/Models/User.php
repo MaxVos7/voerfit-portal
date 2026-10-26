@@ -18,6 +18,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property int $id
  * @property string $name
  * @property string $email
+ * @property int|null $herd_id The herd the user is limited to; null means every herd.
  * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $two_factor_secret
@@ -43,6 +44,7 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     {
         return [
             'email_verified_at' => 'datetime',
+            'herd_id' => 'integer',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];

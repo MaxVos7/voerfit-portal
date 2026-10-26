@@ -3,8 +3,10 @@
 namespace App\Models\Farm;
 
 use App\Models\Farm\Concerns\HasCowNumber;
+use App\Models\Farm\Scopes\OwnHerdScope;
 use Database\Factories\Farm\AnimalSummaryFactory;
 use Illuminate\Database\Eloquent\Attributes\Connection;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,9 +17,11 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $animal_id
  * @property string|null $life_number
  * @property string|null $name
+ * @property int|null $herd_id
  * @property int|null $cow_number Selected by withCowNumber().
  */
 #[Connection('farm')]
+#[ScopedBy(OwnHerdScope::class)]
 #[Table(name: 'core_animal_summary', key: 'animal_id', incrementing: false, timestamps: false)]
 class AnimalSummary extends Model
 {

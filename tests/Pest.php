@@ -95,6 +95,7 @@ function createFarmSchema(): void
         $table->integer('animal_id')->primary();
         $table->string('life_number', 32)->nullable();
         $table->string('name')->nullable();
+        $table->bigInteger('herd_id')->nullable();
     });
 
     $schema->create('agrovision_animal', function (Blueprint $table) {
@@ -112,5 +113,38 @@ function createFarmSchema(): void
         $table->double('lactose_percentage')->nullable();
         $table->double('cell_value')->nullable();
         $table->double('urea')->nullable();
+    });
+
+    $schema->create('voerfit_rule_values', function (Blueprint $table) {
+        $table->string('name')->primary();
+        $table->string('value');
+        $table->string('source')->nullable();
+    });
+
+    $schema->create('feed_engine_release_hold', function (Blueprint $table) {
+        $table->id();
+        $table->integer('animal_id');
+        $table->integer('feed_number');
+        $table->decimal('hold_kg', 5, 2)->nullable();
+        $table->decimal('last_applied_kg', 5, 2)->nullable();
+        $table->date('last_applied_date')->nullable();
+        $table->boolean('active')->default(true);
+    });
+
+    $schema->create('experiment_controlgroupassignment', function (Blueprint $table) {
+        $table->id();
+        $table->integer('animal_id');
+        $table->string('experiment_id');
+        $table->boolean('active')->default(true);
+        $table->boolean('belongs_to_test_group')->default(true);
+        $table->double('delta_feed')->nullable();
+    });
+
+    $schema->create('core_camerasnapshot', function (Blueprint $table) {
+        $table->id();
+        $table->integer('animal_id');
+        $table->dateTime('time');
+        $table->string('gcs_path');
+        $table->string('label');
     });
 }
