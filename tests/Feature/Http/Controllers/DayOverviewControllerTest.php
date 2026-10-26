@@ -210,31 +210,6 @@ it('returns the milk sample values of the cow', function () {
         );
 });
 
-it('averages milk production fat protein urea and BCS over the lactating cows', function () {
-    CowDailySummary::factory()->onDay('2026-10-19')->create([
-        'animal_id' => 1, 'interval_milk_production' => 40.0, 'lab_fat_percentage' => 4.0,
-        'lab_protein_percentage' => 3.0, 'lab_ureum' => 20.0, 'bcs' => 3.0,
-    ]);
-    CowDailySummary::factory()->onDay('2026-10-19')->create([
-        'animal_id' => 2, 'interval_milk_production' => 30.0, 'lab_fat_percentage' => 5.0,
-        'lab_protein_percentage' => 4.0, 'lab_ureum' => 10.0, 'bcs' => null,
-    ]);
-    CowDailySummary::factory()->onDay('2026-10-19')->dry()->create([
-        'animal_id' => 3, 'interval_milk_production' => 0.0, 'bcs' => 1.0,
-    ]);
-
-    $this->get(route('day-overview', ['dag' => '2026-10-19']))
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('averages', [
-                'milkProduction' => 35,
-                'fat' => 4.5,
-                'protein' => 3.5,
-                'urea' => 15,
-                'bcs' => 3,
-            ])
-        );
-});
-
 it('returns empty data when there are no days yet', function () {
     $this->get(route('day-overview'))
         ->assertOk()

@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import {
-    ArrowDown,
-    ArrowUp,
-    FileText,
-    LayoutGrid,
-    TriangleAlert,
-} from '@lucide/vue';
+import { ArrowDown, ArrowUp, FileText, TriangleAlert } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import LogoutButton from '@/components/farm/LogoutButton.vue';
 import { Button } from '@/components/ui/button';
@@ -57,13 +51,6 @@ const props = defineProps<{
     selectedDay: string | null;
     selectedDayLabel: string | null;
     cows: Cow[];
-    averages: {
-        milkProduction: number | null;
-        fat: number | null;
-        protein: number | null;
-        urea: number | null;
-        bcs: number | null;
-    } | null;
 }>();
 
 const columns: Column[] = [
@@ -91,7 +78,6 @@ const columns: Column[] = [
 
 const sortKey = ref<SortKey>('cowNumber');
 const sortAscending = ref(true);
-const showAverages = ref(false);
 
 const sortedCows = computed(() => {
     const direction = sortAscending.value ? 1 : -1;
@@ -230,14 +216,6 @@ function cell(cow: Cow, key: SortKey): string {
                 </Select>
             </div>
 
-            <Button
-                variant="outline"
-                :aria-pressed="showAverages"
-                @click="showAverages = !showAverages"
-            >
-                <LayoutGrid />
-                Met gemiddelden
-            </Button>
             <Button variant="outline" as-child>
                 <Link :href="feedRules()">
                     <FileText />
@@ -373,47 +351,6 @@ function cell(cow: Cow, key: SortKey): string {
                     </tbody>
                 </table>
             </div>
-        </section>
-
-        <section
-            v-if="showAverages && averages"
-            class="rounded-lg border bg-background px-4 py-3"
-        >
-            <h2 class="mb-2 font-medium">
-                Gemiddelden - {{ selectedDayLabel }}
-            </h2>
-            <dl class="grid grid-cols-2 gap-4 sm:grid-cols-5">
-                <div>
-                    <dt class="text-sm text-muted-foreground">Melkproductie</dt>
-                    <dd class="text-xl tabular-nums">
-                        {{ decimal(averages.milkProduction, 2) }}
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-muted-foreground">Vet %</dt>
-                    <dd class="text-xl tabular-nums">
-                        {{ decimal(averages.fat, 2) }}
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-muted-foreground">Eiwit %</dt>
-                    <dd class="text-xl tabular-nums">
-                        {{ decimal(averages.protein, 2) }}
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-muted-foreground">Ureum</dt>
-                    <dd class="text-xl tabular-nums">
-                        {{ decimal(averages.urea, 2) }}
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-muted-foreground">BCS</dt>
-                    <dd class="text-xl tabular-nums">
-                        {{ decimal(averages.bcs, 2) }}
-                    </dd>
-                </div>
-            </dl>
         </section>
     </div>
 </template>

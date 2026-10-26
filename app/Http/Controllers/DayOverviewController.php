@@ -33,7 +33,6 @@ class DayOverviewController extends Controller
             'cows' => $selectedDay
                 ? DayOverviewCowResource::collection($this->cows($selectedDay))->resolve()
                 : [],
-            'averages' => $selectedDay ? $this->averages($selectedDay) : null,
         ]);
     }
 
@@ -50,32 +49,6 @@ class DayOverviewController extends Controller
             ->get()
             ->sortBy(fn (CowDailySummary $cow): int => $cow->cow_number ?? PHP_INT_MAX)
             ->values();
-    }
-
-    /**
-     * @return array{milkProduction: ?float, fat: ?float, protein: ?float, urea: ?float, bcs: ?float}
-     */
-    private function averages(CarbonImmutable $day): array
-    {
-        $averages = CowDailySummary::query()
-            ->lactatingOn($day)
-            ->toBase()
-            ->selectRaw('avg(interval_milk_production) as milk_production')
-            ->selectRaw('avg(lab_fat_percentage) as fat')
-            ->selectRaw('avg(lab_protein_percentage) as protein')
-            ->selectRaw('avg(lab_ureum) as urea')
-            ->selectRaw('avg(bcs) as bcs')
-            ->first();
-
-        $round = fn (mixed $value): ?float => $value === null ? null : round((float) $value, 2);
-
-        return [
-            'milkProduction' => $round($averages?->milk_production),
-            'fat' => $round($averages?->fat),
-            'protein' => $round($averages?->protein),
-            'urea' => $round($averages?->urea),
-            'bcs' => $round($averages?->bcs),
-        ];
     }
 
     private function parseDay(mixed $value): ?CarbonImmutable
