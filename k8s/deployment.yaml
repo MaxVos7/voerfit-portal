@@ -23,7 +23,7 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        - { name: APP_NAME, value: "Voerfit" }
+        - { name: APP_NAME, value: "VoerFit" }
         - { name: APP_ENV, value: "production" }
         - { name: APP_DEBUG, value: "false" }
         - { name: APP_URL, value: "https://vanvelde-new.voerfit.nl" }
