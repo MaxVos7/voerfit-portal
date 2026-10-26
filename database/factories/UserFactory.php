@@ -37,6 +37,16 @@ class UserFactory extends Factory
     }
 
     /**
+     * Limit the user to the animals of one herd.
+     */
+    public function forHerd(int $herdId): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'herd_id' => $herdId,
+        ]);
+    }
+
+    /**
      * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static

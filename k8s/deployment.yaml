@@ -23,16 +23,23 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        - { name: APP_NAME, value: "Voerfit" }
+        - { name: APP_NAME, value: "VoerFit" }
         - { name: APP_ENV, value: "production" }
         - { name: APP_DEBUG, value: "false" }
         - { name: APP_URL, value: "https://vanvelde-new.voerfit.nl" }
         - { name: APP_LOCALE, value: "nl" }
         - { name: LOG_CHANNEL, value: "stderr" }
-        # No portal tables are needed yet: sessions live in cookies and nothing
-        # is queued, so the default connection is a throwaway in-memory SQLite.
-        - { name: DB_CONNECTION, value: "sqlite" }
-        - { name: DB_DATABASE, value: ":memory:" }
+        # The portal's own tables (users, passkeys) live in the shared ai database,
+        # created by `php artisan migrate`, and are used with the same role as the
+        # farm connection below.
+        - { name: DB_CONNECTION, value: "pgsql" }
+        - { name: DB_HOST, value: "postgres" }
+        - { name: DB_PORT, value: "5432" }
+        - { name: DB_DATABASE, value: "ai" }
+        - name: DB_USERNAME
+          valueFrom: { secretKeyRef: { name: voerfit-portal, key: FARM_DB_USERNAME } }
+        - name: DB_PASSWORD
+          valueFrom: { secretKeyRef: { name: voerfit-portal, key: FARM_DB_PASSWORD } }
         - { name: SESSION_DRIVER, value: "cookie" }
         - { name: SESSION_SECURE_COOKIE, value: "true" }
         - { name: CACHE_STORE, value: "file" }

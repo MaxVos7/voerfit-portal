@@ -5,10 +5,12 @@ use App\Models\Farm\AgrovisionMilkSample;
 use App\Models\Farm\AnimalSummary;
 use App\Models\Farm\CowDailySummary;
 use App\Models\Farm\IngestAnimal;
+use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
     createFarmSchema();
+    $this->actingAs(User::factory()->create());
     $this->travelTo('2026-10-20 09:00:00');
 });
 

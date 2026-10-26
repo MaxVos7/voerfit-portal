@@ -4,12 +4,15 @@ import {
     ArrowDown,
     ArrowUp,
     FileText,
-    LayoutGrid,
-    Maximize,
+    Search,
     TriangleAlert,
+    X,
 } from '@lucide/vue';
 import { computed, ref } from 'vue';
+import ColumnSettings from '@/components/farm/ColumnSettings.vue';
+import FavoriteButton from '@/components/farm/FavoriteButton.vue';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -17,7 +20,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { dayOverview } from '@/routes';
+import { dayOverview, feedRules } from '@/routes';
 import { show } from '@/routes/cows';
 
 type Cow = {
@@ -56,17 +59,11 @@ const props = defineProps<{
     days: { value: string; label: string }[];
     selectedDay: string | null;
     selectedDayLabel: string | null;
+    columns: { key: SortKey; visible: boolean }[];
     cows: Cow[];
-    averages: {
-        milkProduction: number | null;
-        fat: number | null;
-        protein: number | null;
-        urea: number | null;
-        bcs: number | null;
-    } | null;
 }>();
 
-const columns: Column[] = [
+const columnDefinitions: Column[] = [
     { key: 'cowNumber', label: 'Koenr.', align: 'right' },
     { key: 'lifeNumber', label: 'Levensnummer', align: 'left' },
     { key: 'daysInMilk', label: 'Lactatiedagen', align: 'right' },
@@ -89,15 +86,56 @@ const columns: Column[] = [
     },
 ];
 
+const columnLabels = Object.fromEntries(
+    columnDefinitions.map((column) => [column.key, column.label]),
+);
+
+const visibleColumns = computed(() =>
+    props.columns
+        .filter((column) => column.visible)
+        .map(
+            (column) =>
+                columnDefinitions.find(
+                    (definition) => definition.key === column.key,
+                ) as Column,
+        ),
+);
+
+// The cow number links to the cow; when it is hidden, the first visible column takes over.
+const linkColumnKey = computed(
+    () =>
+        visibleColumns.value.find((column) => column.key === 'cowNumber')
+            ?.key ?? visibleColumns.value[0]?.key,
+);
+
 const sortKey = ref<SortKey>('cowNumber');
 const sortAscending = ref(true);
-const showAverages = ref(false);
-const tableCard = ref<HTMLElement | null>(null);
+
+const search = ref('');
+
+// Spaces and case are ignored, so "NL 754 180962" and "nl754180962" find the same cow.
+function normalize(value: string): string {
+    return value.toLowerCase().replace(/\s+/g, '');
+}
+
+const filteredCows = computed(() => {
+    const query = normalize(search.value);
+
+    if (query === '') {
+        return props.cows;
+    }
+
+    return props.cows.filter(
+        (cow) =>
+            String(cow.cowNumber ?? '').includes(query) ||
+            normalize(cow.lifeNumber ?? '').includes(query),
+    );
+});
 
 const sortedCows = computed(() => {
     const direction = sortAscending.value ? 1 : -1;
 
-    return [...props.cows].sort((a, b) => {
+    return [...filteredCows.value].sort((a, b) => {
         const left = a[sortKey.value];
         const right = b[sortKey.value];
 
@@ -139,16 +177,6 @@ function selectDay(day: unknown): void {
         {},
         { preserveState: true },
     );
-}
-
-function toggleFullscreen(): void {
-    if (document.fullscreenElement) {
-        void document.exitFullscreen();
-
-        return;
-    }
-
-    void tableCard.value?.requestFullscreen();
 }
 
 function decimal(value: number | null, digits: number, unit = ''): string {
@@ -211,7 +239,7 @@ function cell(cow: Cow, key: SortKey): string {
 <template>
     <Head title="Dagoverzicht koeien" />
 
-    <div class="flex min-h-screen flex-col gap-4 bg-muted/40 p-4">
+    <div class="flex flex-1 flex-col gap-4 p-4">
         <header class="flex flex-wrap items-center gap-2">
             <h1 class="mr-4 text-lg font-semibold">Dagoverzicht koeien</h1>
 
@@ -241,27 +269,38 @@ function cell(cow: Cow, key: SortKey): string {
                 </Select>
             </div>
 
-            <Button
-                variant="outline"
-                :aria-pressed="showAverages"
-                @click="showAverages = !showAverages"
-            >
-                <LayoutGrid />
-                Met gemiddelden
+            <Button variant="outline" as-child>
+                <Link :href="feedRules()">
+                    <FileText />
+                    Voerregels
+                </Link>
             </Button>
-            <Button variant="outline" @click="toggleFullscreen">
-                <Maximize />
-                Volledig scherm
-            </Button>
-            <!-- TODO: link to the Voerregels page once it exists in the portal. -->
-            <Button variant="outline" disabled title="Volgt binnenkort">
-                <FileText />
-                Voerregels
-            </Button>
+            <ColumnSettings :columns="columns" :labels="columnLabels" />
+
+            <div class="relative ml-auto w-72">
+                <Search
+                    class="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                    v-model="search"
+                    type="text"
+                    placeholder="Zoek op koenr. of levensnummer"
+                    aria-label="Zoek op koenr. of levensnummer"
+                    class="bg-background px-8"
+                />
+                <button
+                    v-if="search !== ''"
+                    type="button"
+                    class="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label="Zoekopdracht wissen"
+                    @click="search = ''"
+                >
+                    <X class="size-4" />
+                </button>
+            </div>
         </header>
 
         <section
-            ref="tableCard"
             class="flex min-h-0 flex-1 flex-col rounded-lg border bg-background"
         >
             <h2 class="px-4 pt-3 pb-2 font-medium">
@@ -269,14 +308,23 @@ function cell(cow: Cow, key: SortKey): string {
                 <template v-if="selectedDayLabel">
                     - {{ selectedDayLabel }}
                 </template>
+                <span
+                    v-if="search !== ''"
+                    class="ml-1 text-sm font-normal text-muted-foreground"
+                >
+                    ({{ sortedCows.length }} van {{ cows.length }})
+                </span>
             </h2>
 
-            <div class="max-h-[calc(100vh-10rem)] overflow-auto px-2 pb-2">
+            <div class="max-h-[calc(100vh-14rem)] overflow-auto px-2 pb-2">
                 <table class="w-full border-collapse text-sm tabular-nums">
                     <thead class="sticky top-0 z-10 bg-background">
                         <tr>
+                            <th scope="col" class="w-8 border-b px-1">
+                                <span class="sr-only">Favoriet</span>
+                            </th>
                             <th
-                                v-for="column in columns"
+                                v-for="column in visibleColumns"
                                 :key="column.key"
                                 scope="col"
                                 :aria-sort="
@@ -325,8 +373,11 @@ function cell(cow: Cow, key: SortKey): string {
                             :key="cow.animalId"
                             class="hover:bg-muted/50"
                         >
+                            <td class="border-b px-1 py-0.5">
+                                <FavoriteButton :animal-id="cow.animalId" />
+                            </td>
                             <td
-                                v-for="column in columns"
+                                v-for="column in visibleColumns"
                                 :key="column.key"
                                 class="border-b px-2 py-1.5 whitespace-nowrap"
                                 :class="[
@@ -339,11 +390,15 @@ function cell(cow: Cow, key: SortKey): string {
                                 ]"
                             >
                                 <Link
-                                    v-if="column.key === 'cowNumber'"
+                                    v-if="column.key === linkColumnKey"
                                     :href="show(cow.animalId)"
                                     class="text-blue-600 hover:underline dark:text-blue-400"
                                 >
-                                    {{ cow.cowNumber ?? '–' }}
+                                    {{
+                                        column.key === 'cowNumber'
+                                            ? (cow.cowNumber ?? '–')
+                                            : cell(cow, column.key)
+                                    }}
                                 </Link>
                                 <span
                                     v-else-if="
@@ -378,56 +433,23 @@ function cell(cow: Cow, key: SortKey): string {
                         </tr>
                         <tr v-if="cows.length === 0">
                             <td
-                                :colspan="columns.length"
+                                :colspan="visibleColumns.length + 1"
                                 class="px-2 py-8 text-center text-muted-foreground"
                             >
                                 Geen lacterende koeien voor deze dag.
                             </td>
                         </tr>
+                        <tr v-else-if="sortedCows.length === 0">
+                            <td
+                                :colspan="visibleColumns.length + 1"
+                                class="px-2 py-8 text-center text-muted-foreground"
+                            >
+                                Geen koeien gevonden voor "{{ search }}".
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
-        </section>
-
-        <section
-            v-if="showAverages && averages"
-            class="rounded-lg border bg-background px-4 py-3"
-        >
-            <h2 class="mb-2 font-medium">
-                Gemiddelden - {{ selectedDayLabel }}
-            </h2>
-            <dl class="grid grid-cols-2 gap-4 sm:grid-cols-5">
-                <div>
-                    <dt class="text-sm text-muted-foreground">Melkproductie</dt>
-                    <dd class="text-xl tabular-nums">
-                        {{ decimal(averages.milkProduction, 2) }}
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-muted-foreground">Vet %</dt>
-                    <dd class="text-xl tabular-nums">
-                        {{ decimal(averages.fat, 2) }}
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-muted-foreground">Eiwit %</dt>
-                    <dd class="text-xl tabular-nums">
-                        {{ decimal(averages.protein, 2) }}
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-muted-foreground">Ureum</dt>
-                    <dd class="text-xl tabular-nums">
-                        {{ decimal(averages.urea, 2) }}
-                    </dd>
-                </div>
-                <div>
-                    <dt class="text-sm text-muted-foreground">BCS</dt>
-                    <dd class="text-xl tabular-nums">
-                        {{ decimal(averages.bcs, 2) }}
-                    </dd>
-                </div>
-            </dl>
         </section>
     </div>
 </template>

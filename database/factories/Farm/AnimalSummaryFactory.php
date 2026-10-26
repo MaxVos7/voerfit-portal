@@ -23,4 +23,9 @@ class AnimalSummaryFactory extends Factory
             'name' => strtoupper(fake()->firstName()),
         ];
     }
+
+    public function inHerd(int $herdId): static
+    {
+        return $this->state(fn (array $attributes) => ['herd_id' => $herdId]);
+    }
 }

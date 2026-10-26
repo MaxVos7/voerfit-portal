@@ -4,11 +4,13 @@ namespace App\Models\Farm;
 
 use App\Models\Farm\Concerns\CalculatesMeetmelk;
 use App\Models\Farm\Concerns\HasCowNumber;
+use App\Models\Farm\Scopes\AnimalsOfUsersHerdScope;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\Farm\CowDailySummaryFactory;
 use Illuminate\Database\Eloquent\Attributes\Connection;
 use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -51,6 +53,7 @@ use Illuminate\Support\Facades\DB;
  * @property string|null $latest_bcs_time Selected by withLatestBcs().
  */
 #[Connection('farm')]
+#[ScopedBy(AnimalsOfUsersHerdScope::class)]
 #[Table(name: 'core_cow_daily_summary', incrementing: false, timestamps: false, dateFormat: 'Y-m-d')]
 class CowDailySummary extends Model
 {

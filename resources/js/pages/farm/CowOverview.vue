@@ -2,6 +2,7 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowLeft, Camera } from '@lucide/vue';
 import CowChart from '@/components/farm/CowChart.vue';
+import FavoriteButton from '@/components/farm/FavoriteButton.vue';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -11,7 +12,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { dayOverview } from '@/routes';
-import { show } from '@/routes/cows';
+import { camera, show } from '@/routes/cows';
 import type { ChartBcs, ChartDay, ChartMilkSample } from '@/types';
 
 const props = defineProps<{
@@ -98,7 +99,7 @@ function feedClass(delta: number | null): string {
 <template>
     <Head :title="cow.label" />
 
-    <div class="flex min-h-screen flex-col gap-4 bg-muted/40 p-4">
+    <div class="flex flex-1 flex-col gap-4 p-4">
         <header class="flex flex-wrap items-center gap-2">
             <Button as-child>
                 <Link :href="dayOverview()">
@@ -106,11 +107,13 @@ function feedClass(delta: number | null): string {
                     Terug
                 </Link>
             </Button>
-            <!-- TODO: link to the camera images page once it exists in the portal. -->
-            <Button disabled title="Volgt binnenkort">
-                <Camera />
-                Foto's
+            <Button as-child>
+                <Link :href="camera(cow.animalId)">
+                    <Camera />
+                    Foto's
+                </Link>
             </Button>
+            <FavoriteButton :animal-id="cow.animalId" with-label />
 
             <div class="ml-2 flex items-center rounded-md border bg-background">
                 <span class="border-r px-3 text-sm text-muted-foreground"

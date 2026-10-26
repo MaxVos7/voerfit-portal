@@ -16,17 +16,12 @@ defineProps<{
         <div class="w-full max-w-sm">
             <div class="flex flex-col gap-8">
                 <div class="flex flex-col items-center gap-4">
-                    <Link
-                        :href="home()"
-                        class="flex flex-col items-center gap-2 font-medium"
-                    >
-                        <div
-                            class="mb-1 flex h-9 w-9 items-center justify-center rounded-md"
+                    <Link :href="home()" class="flex items-center gap-3">
+                        <AppLogoIcon class="size-12" />
+                        <span
+                            class="bg-linear-to-l from-black to-teal-500 bg-clip-text text-4xl font-medium text-transparent dark:from-white"
+                            >VoerFit</span
                         >
-                            <AppLogoIcon
-                                class="size-9 fill-current text-[var(--foreground)] dark:text-white"
-                            />
-                        </div>
                         <span class="sr-only">{{ title }}</span>
                     </Link>
                     <div class="space-y-2 text-center">

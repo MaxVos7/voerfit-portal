@@ -1,7 +1,10 @@
 <?php
 
+use App\Models\User;
+
 beforeEach(function () {
     createFarmSchema();
+    $this->actingAs(User::factory()->create());
 });
 
 function configurePortalPassword(): void
