@@ -2,7 +2,6 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowDown, ArrowUp, FileText, TriangleAlert } from '@lucide/vue';
 import { computed, ref } from 'vue';
-import LogoutButton from '@/components/farm/LogoutButton.vue';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -186,7 +185,7 @@ function cell(cow: Cow, key: SortKey): string {
 <template>
     <Head title="Dagoverzicht koeien" />
 
-    <div class="flex min-h-screen flex-col gap-4 bg-muted/40 p-4">
+    <div class="flex flex-1 flex-col gap-4 p-4">
         <header class="flex flex-wrap items-center gap-2">
             <h1 class="mr-4 text-lg font-semibold">Dagoverzicht koeien</h1>
 
@@ -222,7 +221,6 @@ function cell(cow: Cow, key: SortKey): string {
                     Voerregels
                 </Link>
             </Button>
-            <LogoutButton />
         </header>
 
         <section
@@ -235,7 +233,7 @@ function cell(cow: Cow, key: SortKey): string {
                 </template>
             </h2>
 
-            <div class="max-h-[calc(100vh-10rem)] overflow-auto px-2 pb-2">
+            <div class="max-h-[calc(100vh-14rem)] overflow-auto px-2 pb-2">
                 <table class="w-full border-collapse text-sm tabular-nums">
                     <thead class="sticky top-0 z-10 bg-background">
                         <tr>

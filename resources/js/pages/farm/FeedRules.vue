@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import { ArrowLeft } from '@lucide/vue';
-import LogoutButton from '@/components/farm/LogoutButton.vue';
 import { Button } from '@/components/ui/button';
 import { dayOverview } from '@/routes';
 
@@ -49,7 +48,7 @@ function shortDate(isoDate: string | null): string {
 <template>
     <Head title="Voerregels" />
 
-    <div class="flex min-h-screen flex-col gap-4 bg-muted/40 p-4">
+    <div class="flex flex-1 flex-col gap-4 p-4">
         <header class="flex flex-wrap items-center gap-2">
             <Button as-child>
                 <Link :href="dayOverview()">
@@ -57,7 +56,6 @@ function shortDate(isoDate: string | null): string {
                     Dagoverzicht koeien
                 </Link>
             </Button>
-            <LogoutButton />
         </header>
 
         <section class="rounded-lg border bg-background px-4 py-3">

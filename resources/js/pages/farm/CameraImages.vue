@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import { ArrowLeft } from '@lucide/vue';
-import LogoutButton from '@/components/farm/LogoutButton.vue';
 import { Button } from '@/components/ui/button';
 import {
     Select,
@@ -80,7 +79,7 @@ function feedClass(delta: number | null): string {
 <template>
     <Head :title="`Camerabeelden ${cow.label}`" />
 
-    <div class="flex min-h-screen flex-col gap-4 bg-muted/40 p-4">
+    <div class="flex flex-1 flex-col gap-4 p-4">
         <header class="flex flex-wrap items-center gap-2">
             <Button as-child>
                 <Link :href="show(cow.animalId)">
