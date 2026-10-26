@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ArrowDown, ArrowUp, FileText, TriangleAlert } from '@lucide/vue';
+import {
+    ArrowDown,
+    ArrowUp,
+    FileText,
+    Search,
+    TriangleAlert,
+    X,
+} from '@lucide/vue';
 import { computed, ref } from 'vue';
 import ColumnSettings from '@/components/farm/ColumnSettings.vue';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
     Select,
     SelectContent,
@@ -102,10 +110,31 @@ const linkColumnKey = computed(
 const sortKey = ref<SortKey>('cowNumber');
 const sortAscending = ref(true);
 
+const search = ref('');
+
+// Spaces and case are ignored, so "NL 754 180962" and "nl754180962" find the same cow.
+function normalize(value: string): string {
+    return value.toLowerCase().replace(/\s+/g, '');
+}
+
+const filteredCows = computed(() => {
+    const query = normalize(search.value);
+
+    if (query === '') {
+        return props.cows;
+    }
+
+    return props.cows.filter(
+        (cow) =>
+            String(cow.cowNumber ?? '').includes(query) ||
+            normalize(cow.lifeNumber ?? '').includes(query),
+    );
+});
+
 const sortedCows = computed(() => {
     const direction = sortAscending.value ? 1 : -1;
 
-    return [...props.cows].sort((a, b) => {
+    return [...filteredCows.value].sort((a, b) => {
         const left = a[sortKey.value];
         const right = b[sortKey.value];
 
@@ -246,6 +275,28 @@ function cell(cow: Cow, key: SortKey): string {
                 </Link>
             </Button>
             <ColumnSettings :columns="columns" :labels="columnLabels" />
+
+            <div class="relative ml-auto w-72">
+                <Search
+                    class="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                    v-model="search"
+                    type="text"
+                    placeholder="Zoek op koenr. of levensnummer"
+                    aria-label="Zoek op koenr. of levensnummer"
+                    class="bg-background px-8"
+                />
+                <button
+                    v-if="search !== ''"
+                    type="button"
+                    class="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label="Zoekopdracht wissen"
+                    @click="search = ''"
+                >
+                    <X class="size-4" />
+                </button>
+            </div>
         </header>
 
         <section
@@ -256,6 +307,12 @@ function cell(cow: Cow, key: SortKey): string {
                 <template v-if="selectedDayLabel">
                     - {{ selectedDayLabel }}
                 </template>
+                <span
+                    v-if="search !== ''"
+                    class="ml-1 text-sm font-normal text-muted-foreground"
+                >
+                    ({{ sortedCows.length }} van {{ cows.length }})
+                </span>
             </h2>
 
             <div class="max-h-[calc(100vh-14rem)] overflow-auto px-2 pb-2">
@@ -373,6 +430,14 @@ function cell(cow: Cow, key: SortKey): string {
                                 class="px-2 py-8 text-center text-muted-foreground"
                             >
                                 Geen lacterende koeien voor deze dag.
+                            </td>
+                        </tr>
+                        <tr v-else-if="sortedCows.length === 0">
+                            <td
+                                :colspan="visibleColumns.length"
+                                class="px-2 py-8 text-center text-muted-foreground"
+                            >
+                                Geen koeien gevonden voor "{{ search }}".
                             </td>
                         </tr>
                     </tbody>
