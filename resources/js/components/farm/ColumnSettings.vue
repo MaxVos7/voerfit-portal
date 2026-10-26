@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { router } from '@inertiajs/vue3';
-import { ArrowDown, ArrowUp, Columns3 } from '@lucide/vue';
+import { ArrowDown, ArrowUp, Columns3, GripVertical } from '@lucide/vue';
 import { computed, ref, watch } from 'vue';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,16 +36,60 @@ watch(open, (isOpen) => {
     }
 });
 
-function move(index: number, offset: -1 | 1): void {
-    const target = index + offset;
+const dragIndex = ref<number | null>(null);
+const overIndex = ref<number | null>(null);
 
-    if (target < 0 || target >= draft.value.length) {
+function moveTo(from: number, to: number): void {
+    if (from === to || to < 0 || to >= draft.value.length) {
         return;
     }
 
     const next = [...draft.value];
-    [next[index], next[target]] = [next[target], next[index]];
+    const [column] = next.splice(from, 1);
+    next.splice(to, 0, column);
     draft.value = next;
+}
+
+function onDragStart(event: DragEvent, index: number): void {
+    dragIndex.value = index;
+
+    if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'move';
+        // Firefox only starts a drag when some data is set.
+        event.dataTransfer.setData('text/plain', String(index));
+    }
+}
+
+function onDragOver(event: DragEvent, index: number): void {
+    if (dragIndex.value === null) {
+        return;
+    }
+
+    event.preventDefault();
+    overIndex.value = index;
+}
+
+function onDrop(index: number): void {
+    if (dragIndex.value !== null) {
+        moveTo(dragIndex.value, index);
+    }
+
+    onDragEnd();
+}
+
+function onDragEnd(): void {
+    dragIndex.value = null;
+    overIndex.value = null;
+}
+
+function dropIndicator(index: number): string {
+    if (dragIndex.value === null || overIndex.value !== index) {
+        return '';
+    }
+
+    return dragIndex.value < index
+        ? 'border-b-2 border-b-primary'
+        : 'border-t-2 border-t-primary';
 }
 
 function setVisible(index: number, visible: boolean | 'indeterminate'): void {
@@ -92,7 +136,8 @@ function restoreDefaults(): void {
             <DialogHeader>
                 <DialogTitle>Kolommen</DialogTitle>
                 <DialogDescription>
-                    Kies welke kolommen je ziet en in welke volgorde.
+                    Kies welke kolommen je ziet en sleep ze in de gewenste
+                    volgorde.
                 </DialogDescription>
             </DialogHeader>
 
@@ -101,7 +146,20 @@ function restoreDefaults(): void {
                     v-for="(column, index) in draft"
                     :key="column.key"
                     class="flex items-center gap-3 px-3 py-1.5"
+                    :class="[
+                        dropIndicator(index),
+                        { 'opacity-50': dragIndex === index },
+                    ]"
+                    draggable="true"
+                    @dragstart="onDragStart($event, index)"
+                    @dragover="onDragOver($event, index)"
+                    @drop.prevent="onDrop(index)"
+                    @dragend="onDragEnd"
                 >
+                    <GripVertical
+                        class="size-4 shrink-0 cursor-grab text-muted-foreground active:cursor-grabbing"
+                        aria-hidden="true"
+                    />
                     <Checkbox
                         :id="`column-${column.key}`"
                         :model-value="column.visible"
@@ -121,7 +179,7 @@ function restoreDefaults(): void {
                         class="size-7"
                         :disabled="index === 0"
                         :aria-label="`${labels[column.key]} omhoog`"
-                        @click="move(index, -1)"
+                        @click="moveTo(index, index - 1)"
                     >
                         <ArrowUp />
                     </Button>
@@ -131,7 +189,7 @@ function restoreDefaults(): void {
                         class="size-7"
                         :disabled="index === draft.length - 1"
                         :aria-label="`${labels[column.key]} omlaag`"
-                        @click="move(index, 1)"
+                        @click="moveTo(index, index + 1)"
                     >
                         <ArrowDown />
                     </Button>
